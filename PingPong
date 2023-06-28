@@ -1,0 +1,97 @@
+#Создай собственный Шутер!
+from pygame import *
+from random import *
+from time import time as times
+
+class GameSprite(sprite.Sprite):
+    def __init__(self,player_image, player_x, player_y, player_speed, R1, R2):
+        super().__init__()
+        self.image = transform.scale(image.load(player_image), (R1,R2))
+        self.speed = player_speed
+        self.rect = self.image.get_rect()
+        self.rect.x = player_x
+        self.rect.y = player_y
+    def reset(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
+class Player(GameSprite):
+    def update_l(self): 
+        keys_pressed = key.get_pressed()
+        if keys_pressed[K_w] and self.rect.y > 5:
+            self.rect.y -= self.speed
+        if keys_pressed[K_s] and self.rect.y < 350:
+            self.rect.y += self.speed
+
+    def update_r(self): 
+        keys_pressed = key.get_pressed()
+        if keys_pressed[K_UP] and self.rect.y > 5:
+            self.rect.y -= self.speed
+        if keys_pressed[K_DOWN] and self.rect.y < 350:
+            self.rect.y += self.speed
+
+
+color = (0,0,0)
+window = display.set_mode((600,500))
+display.set_caption('Ping Pong')
+window.fill(color)
+
+#mixer.init()
+#mixer.music.load('space.ogg')
+#mixer.music.play()
+#
+#fire_s = mixer.Sound('fire.ogg')
+
+font.init()
+font1 = font.Font(None, 90)
+win_1 = font1.render('Win!', True, (0,215,255))
+win_2 = font1.render('Win!', True, (200,0,200))
+
+font2 = font.Font(None,36)
+
+hero_1 = Player('plath.png', 30, 200, 4, 50, 150)
+hero_2 = Player('plath2.png', 520, 200, 4, 50, 150)
+boll = GameSprite('bol.png', 200, 200, 4, 50, 50)
+
+
+clock = time.Clock()
+game = True
+finish = False
+speed_x = 4
+speed_y = 4
+
+while game:
+    for e in event.get():
+        if e.type ==  QUIT:
+            game = False
+                    
+    if finish != True:
+        window.fill(color)
+
+        hero_1.update_l()
+        hero_2.update_r()
+
+        hero_1.reset()
+        hero_2.reset()
+        boll.reset()
+
+        boll.rect.x += speed_x
+        boll.rect.y += speed_y
+
+        if boll.rect.x<0 or boll.rect.x>550:
+            finish = True
+            if boll.rect.x < 0:
+                window.blit(win_1, (250,200))
+            if boll.rect.x > 550:
+                window.blit(win_2, (250,200))
+            
+        if boll.rect.y<0 or boll.rect.y>450:    
+            speed_y*= -1
+
+        if sprite.collide_rect(hero_1, boll) or sprite.collide_rect(hero_2, boll):
+            speed_x*= -1
+
+
+
+
+    display.update()
+    clock.tick(60)
